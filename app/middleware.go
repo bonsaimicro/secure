@@ -3,11 +3,17 @@ package app
 import (
 	"net/http"
 	"os"
+	"secure/database"
 	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
+
+type Claims struct {
+	User database.User `json:"user"`
+	jwt.StandardClaims
+}
 
 func setupMiddleware(r Handler) Handler {
 	return logRequests(checkToken(r))
@@ -17,9 +23,9 @@ func logRequests(h Handler) Handler {
 	return Handler{h.Env, hFunc(func(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStatus {
 		t := time.Now()
 		res := h.H(h.Env, w, r, c)
-		go e.l.LogRequest(r, time.Since(t).String(), res.Error(), res.Status(), c.Email)
+		go e.l.LogRequest(r, time.Since(t).String(), res.Error(), res.Status(), c.User.Email)
 		if res.FuncErr != nil {
-			go e.l.LogError(res.FuncErr, c.Email)
+			go e.l.LogError(res.FuncErr, c.User.Email)
 		}
 		return res
 	})}
@@ -43,7 +49,7 @@ func checkToken(h Handler) Handler {
 			tokenString = strings.TrimPrefix(tokenString, "jwt=")
 		}
 
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 
@@ -52,10 +58,14 @@ func checkToken(h Handler) Handler {
 		}
 
 		if !token.Valid {
-			if ve, ok := err.(*jwt.ValidationError); ok {
+			if ve, okVal := err.(*jwt.ValidationError); okVal {
 				return httpStatus{http.StatusUnauthorized, nil, ve.Error(), nil}
 			}
 			return httpStatus{http.StatusUnauthorized, nil, http.StatusText(http.StatusUnauthorized), nil}
+		}
+
+		if claims, ok := token.Claims.(*Claims); ok {
+			c.User = claims.User
 		}
 
 		return h.H(h.Env, w, r, c)
@@ -73,13 +83,15 @@ func addToken(h Handler) Handler {
 		expires := time.Now().Local().Add(48 * time.Hour)
 		mySigningKey := []byte(os.Getenv("JWT_SECRET"))
 
-		// Create the Claims
-		claims := &jwt.StandardClaims{
-			ExpiresAt: expires.Unix(),
-			Issuer:    "server",
+		claims := Claims{
+			c.User,
+			jwt.StandardClaims{
+				ExpiresAt: expires.Unix(),
+				Issuer:    "server",
+			},
 		}
 
-		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, &claims)
 		ss, signErr := token.SignedString(mySigningKey)
 
 		if signErr != nil {

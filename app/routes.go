@@ -56,7 +56,7 @@ type Handler struct {
 }
 
 type context struct {
-	database.User
+	User database.User
 }
 
 type results struct {
@@ -108,6 +108,7 @@ func login(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStatu
 		}
 
 		user, err := e.db.FindUser(a.Email, a.Password)
+		c.User = database.User{Email: user.Email, FirstName: user.FirstName, LastName: user.LastName}
 
 		if err != nil {
 			return httpStatus{http.StatusInternalServerError, nil, err.Error(), err}
@@ -140,6 +141,7 @@ func signup(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStat
 		}
 
 		user, err := database.NewUser(a.Email, a.Password)
+		c.User = database.User{Email: user.Email, FirstName: user.FirstName, LastName: user.LastName}
 
 		if err != nil {
 			return httpStatus{http.StatusInternalServerError, nil, "", err}
@@ -163,5 +165,11 @@ func signup(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStat
 }
 
 func proxy(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStatus {
-	return httpStatus{http.StatusOK, []byte(""), "", nil}
+	res, err := json.Marshal(result{"success", c.User})
+
+	if err != nil {
+		return httpStatus{http.StatusInternalServerError, nil, "Error marshalling results", err}
+	}
+
+	return httpStatus{http.StatusOK, res, "", nil}
 }
