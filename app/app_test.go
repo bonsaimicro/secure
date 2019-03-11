@@ -30,7 +30,7 @@ var d datastore_mock.Datastore
 
 func TestMain(m *testing.M) {
 	d = datastore_mock.Datastore{}
-	env := Env{&d, &loggerX{}}
+	env := Env{&d, &loggerX{}, nil}
 	env.setupRoutes()
 	m.Run()
 }

@@ -16,6 +16,7 @@ run:
 	ENV=development \
 	DARE_PASSWORD=password \
 	DARE_SALT=salt \
+	JWT_SECRET=jwt_secret \
 	$(GO) run main.go
 
 run-docker:

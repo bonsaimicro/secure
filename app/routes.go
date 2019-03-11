@@ -84,7 +84,7 @@ func (e *Env) setupRoutes() {
 		r.Handle(f.key, setupMiddleware(Handler{e, f.H}))
 	}
 	for _, f := range openRoutes {
-		r.Handle(f.key, logRequests(Handler{e, f.H}))
+		r.Handle(f.key, logRequests(addToken(Handler{e, f.H})))
 	}
 }
 

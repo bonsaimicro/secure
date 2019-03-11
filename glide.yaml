@@ -9,3 +9,4 @@ import:
 - package: github.com/rs/xid
   version: ^1.2.1
 - package: github.com/minio/sio
+- package: github.com/auth0/go-jwt-middleware

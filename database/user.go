@@ -55,9 +55,6 @@ func (d *datastore) AddUser(u *User) (*User, error) {
 		return u, err
 	}
 
-	// sleep to protect against spamming
-	time.Sleep(2 * time.Second)
-
 	return nil, errors.New("Email already exists")
 }
 

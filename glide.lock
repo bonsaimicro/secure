@@ -1,8 +1,10 @@
-hash: 75288ea3982a38ad82a1f9d777174f65a40b275354d69890d66d14fba4207564
-updated: 2019-03-11T12:13:24.245022+13:00
+hash: fbdabf1d158539f7cda424ee1dac40640f09094351a086cba3be6837724f33bd
+updated: 2019-03-11T13:50:29.801605+13:00
 imports:
 - name: github.com/AndreasBriese/bbloom
   version: 343706a395b76e5ca5c7dca46a5d937b48febc74
+- name: github.com/auth0/go-jwt-middleware
+  version: 5493cabe49f7bfa6e2ec444a09d334d90cd4e2bd
 - name: github.com/davecgh/go-spew
   version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
   subpackages:
@@ -49,7 +51,9 @@ imports:
   - acme
   - acme/autocert
   - argon2
+  - bcrypt
   - blake2b
+  - blowfish
   - chacha20poly1305
   - internal/chacha20
   - poly1305
