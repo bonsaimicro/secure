@@ -1,0 +1,68 @@
+hash: 75288ea3982a38ad82a1f9d777174f65a40b275354d69890d66d14fba4207564
+updated: 2019-03-11T12:13:24.245022+13:00
+imports:
+- name: github.com/AndreasBriese/bbloom
+  version: 343706a395b76e5ca5c7dca46a5d937b48febc74
+- name: github.com/davecgh/go-spew
+  version: d8f796af33cc11cb798c1aaeb27a4ebc5099927d
+  subpackages:
+  - spew
+- name: github.com/dgraph-io/badger
+  version: 439fd464b155d419201a5c195c70d40618376776
+  subpackages:
+  - '...'
+  - options
+  - protos
+  - skl
+  - table
+  - "y"
+- name: github.com/dgryski/go-farm
+  version: 3adb47b1fb0f6d9efcc5051a6c62e2e413ac85a9
+- name: github.com/golang/protobuf
+  version: 05f48f4eaf0e05663b562bab533cdd472238ce29
+  subpackages:
+  - proto
+- name: github.com/konsorten/go-windows-terminal-sequences
+  version: 5c8c8bd35d3832f5d134ae1e1e375b69a4d25242
+- name: github.com/minio/sio
+  version: 035b4ef8c449ba2ba21ec143c91964e76a1fb68c
+- name: github.com/pkg/errors
+  version: 2233dee583dcf88f3c8b22cb7a33f05a499800d8
+- name: github.com/pmezard/go-difflib
+  version: 5d4384ee4fb2527b0a1256a821ebfc92f91efefc
+  subpackages:
+  - difflib
+- name: github.com/rs/xid
+  version: 15d26544def341f036c5f8dca987a4cbe575032c
+- name: github.com/sirupsen/logrus
+  version: e1e72e9de974bd926e5c56f83753fba2df402ce5
+- name: github.com/stretchr/objx
+  version: c61a9dfcced1815e7d40e214d00d1a8669a9f58c
+- name: github.com/stretchr/testify
+  version: 363ebb24d041ccea8068222281c2e963e997b9dc
+  subpackages:
+  - assert
+  - mock
+- name: golang.org/x/crypto
+  version: 8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9
+  subpackages:
+  - acme
+  - acme/autocert
+  - argon2
+  - blake2b
+  - chacha20poly1305
+  - internal/chacha20
+  - poly1305
+  - ssh/terminal
+- name: golang.org/x/net
+  version: d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf
+  subpackages:
+  - internal/timeseries
+  - trace
+- name: golang.org/x/sys
+  version: 7c1e4f34a39c8bf93b6a3379e4ffb3b118ecc614
+  subpackages:
+  - cpu
+  - unix
+  - windows
+testImports: []

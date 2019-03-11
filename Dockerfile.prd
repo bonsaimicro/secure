@@ -1,0 +1,10 @@
+FROM golang:1.11.5
+WORKDIR /go/src/secure
+COPY main.go glide.yaml glide.lock ./
+COPY app app/
+COPY database database/
+COPY logger logger/
+COPY server server/
+RUN curl https://glide.sh/get | sh
+RUN glide install
+CMD CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /binary/main .

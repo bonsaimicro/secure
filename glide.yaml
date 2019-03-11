@@ -1,0 +1,11 @@
+package: .
+import:
+- package: github.com/sirupsen/logrus
+  version: v1.3.0
+- package: github.com/dgraph-io/badger
+  version: v2.0-rc1
+  subpackages:
+  - '...'
+- package: github.com/rs/xid
+  version: ^1.2.1
+- package: github.com/minio/sio
