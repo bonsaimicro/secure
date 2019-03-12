@@ -1,8 +1,12 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"secure/database"
 )
 
@@ -108,11 +112,12 @@ func login(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStatu
 		}
 
 		user, err := e.db.FindUser(a.Email, a.Password)
-		c.User = database.User{Email: user.Email, FirstName: user.FirstName, LastName: user.LastName}
 
 		if err != nil {
 			return httpStatus{http.StatusInternalServerError, nil, err.Error(), err}
 		}
+
+		c.User = database.User{Email: user.Email, FirstName: user.FirstName, LastName: user.LastName}
 
 		res, err := json.Marshal(result{"success", user})
 
@@ -141,11 +146,12 @@ func signup(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStat
 		}
 
 		user, err := database.NewUser(a.Email, a.Password)
-		c.User = database.User{Email: user.Email, FirstName: user.FirstName, LastName: user.LastName}
 
 		if err != nil {
 			return httpStatus{http.StatusInternalServerError, nil, "", err}
 		}
+
+		c.User = database.User{Email: user.Email, FirstName: user.FirstName, LastName: user.LastName}
 
 		user, err = e.db.AddUser(user)
 
@@ -165,11 +171,50 @@ func signup(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStat
 }
 
 func proxy(e *Env, w http.ResponseWriter, r *http.Request, c *context) httpStatus {
-	res, err := json.Marshal(result{"success", c.User})
+	res, err := json.Marshal(c.User)
 
 	if err != nil {
 		return httpStatus{http.StatusInternalServerError, nil, "Error marshalling results", err}
 	}
 
-	return httpStatus{http.StatusOK, res, "", nil}
+	// we need to buffer the body if we want to read it here and send it
+	// in the request.
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		return httpStatus{http.StatusBadRequest, nil, "Could not decode request body", err}
+	}
+
+	// you can reassign the body if you need to parse it as multipart
+	r.Body = ioutil.NopCloser(bytes.NewReader(body))
+
+	// create a new url from the raw RequestURI sent by the client
+	url := fmt.Sprintf("http://%s%s", os.Getenv("FORWARD_URL"), r.RequestURI)
+
+	proxyReq, err := http.NewRequest(r.Method, url, bytes.NewReader(body))
+
+	// We may want to filter some headers, otherwise we could just use a shallow copy
+	// proxyReq.Header = r.Header
+	proxyReq.Header = make(http.Header)
+	for h, val := range r.Header {
+		if h != "Cookie" {
+			proxyReq.Header[h] = val
+		}
+	}
+
+	proxyReq.Header.Set("X-Forwarded-User", string(res))
+
+	httpClient := http.Client{}
+	proxyResp, err := httpClient.Do(proxyReq)
+	if err != nil {
+		return httpStatus{http.StatusBadGateway, nil, http.StatusText(http.StatusBadGateway), err}
+	}
+	defer proxyResp.Body.Close()
+
+	proxyBody, err := ioutil.ReadAll(proxyResp.Body)
+
+	if err != nil {
+		return httpStatus{http.StatusBadRequest, nil, "Could not decode request body of the proxied request", err}
+	}
+
+	return httpStatus{proxyResp.StatusCode, proxyBody, "", err}
 }
